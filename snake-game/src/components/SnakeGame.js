@@ -8,33 +8,41 @@ const SnakeGame = () => {
   const [direction, setDirection] = useState('RIGHT');
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   const cellSize = 20;
   const boardSize = 20;
 
-  // Function to handle key presses for controlling the snake
+  // Function to handle key presses for controlling the snake and pausing the game
   const handleKeyDown = (e) => {
-    switch (e.key) {
-      case 'ArrowUp':
-        if (direction !== 'DOWN') setDirection('UP');
-        break;
-      case 'ArrowDown':
-        if (direction !== 'UP') setDirection('DOWN');
-        break;
-      case 'ArrowLeft':
-        if (direction !== 'RIGHT') setDirection('LEFT');
-        break;
-      case 'ArrowRight':
-        if (direction !== 'LEFT') setDirection('RIGHT');
-        break;
-      default:
-        break;
+    if (e.key === ' ') {
+      e.preventDefault(); // Prevent default space bar behavior
+      setPaused(!paused);
+      return;
+    }
+    if (!paused && !gameOver) {
+      switch (e.key) {
+        case 'ArrowUp':
+          if (direction !== 'DOWN') setDirection('UP');
+          break;
+        case 'ArrowDown':
+          if (direction !== 'UP') setDirection('DOWN');
+          break;
+        case 'ArrowLeft':
+          if (direction !== 'RIGHT') setDirection('LEFT');
+          break;
+        case 'ArrowRight':
+          if (direction !== 'LEFT') setDirection('RIGHT');
+          break;
+        default:
+          break;
+      }
     }
   };
 
   useEffect(() => {
     const moveSnake = () => {
-      if (gameOver) return;
+      if (paused || gameOver) return;
 
       let newSnake = [...snake];
       let head = { ...newSnake[0] };
@@ -93,38 +101,10 @@ const SnakeGame = () => {
       clearInterval(intervalId);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [snake, direction, food, score, gameOver]);
-
-  const SnakeGame = () => {
-    // Additional state for pausing
-    const [paused, setPaused] = useState(false);
-  
-    const handleKeyDown = (e) => {
-      if (e.key === ' ') {
-        setPaused(!paused);
-        return;
-      }
-      // Existing direction logic...
-    };
-  
-    useEffect(() => {
-      if (paused || gameOver) return;
-  
-      // Existing moveSnake logic...
-  
-    }, [snake, direction, food, score, gameOver, paused]);
-  
-    return (
-      <div className="snake-game" role="application" aria-label="Snake Game">
-        {/* Existing JSX... */}
-        {paused && !gameOver && <div className="paused">Game Paused</div>}
-      </div>
-    );
-  };
-  
+  }, [snake, direction, food, score, gameOver, paused]);
 
   return (
-    <div className="snake-game">
+    <div className="snake-game" role="application" aria-label="Snake Game">
       <div className="game-board">
         {Array.from({ length: boardSize }).map((_, rowIndex) => (
           <div key={rowIndex} className="row">
@@ -140,6 +120,7 @@ const SnakeGame = () => {
       <div className="score">
         Score: {score}
       </div>
+      {paused && !gameOver && <div className="paused">Game Paused</div>}
       {gameOver && <div className="game-over">Game Over</div>}
     </div>
   );
